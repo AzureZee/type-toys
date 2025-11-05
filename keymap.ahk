@@ -12,8 +12,13 @@ XButton2::
     Send "^c"
     ClipWait(0.4)
     text := A_Clipboard
-    A_Clipboard := RTrim(text, "`r`n")
-    Tip("已复制", -1000)
+    trimmed := RTrim(text, " `t`r`n")
+    if text == trimmed {
+        Tip("已复制", -1000)
+        return
+    }
+    A_Clipboard := trimmed
+    Tip("已复制 and trim", -1000)
     return
 }
 
