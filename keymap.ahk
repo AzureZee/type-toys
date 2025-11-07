@@ -1,5 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #Include lib\Utils.ahk
+; #Include lib\RunAsAdmin.ahk
+; RunAsAdmin()
 
 ; CapsLock 映射为 Win+Space，切换输入布局（中英文）
 ; SetCapsLockState "AlwaysOff"
