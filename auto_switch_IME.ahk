@@ -1,5 +1,14 @@
+/************************************************************************
+ * @description: 定期检查指定进程的启动状态，只在程序启动时切换输入法.
+ * 配合系统设置使用:允许我为每个应用窗口使用不同的输入法
+ * @author azurezee
+ * @date 2025/11/08
+ * @version 0.1.0
+ ***********************************************************************/
+
+
 #Requires AutoHotkey v2.0
-#Include lib\JSON.ahk
+#Include lib\JSON.ahk ; https://github.com/thqby/ahk2_lib/blob/master/JSON.ahk
 
 ; 解析 config.json
 try {
@@ -16,7 +25,7 @@ for proc in enProcs {
     setToEn[proc] := false
 }
 
-; 定期检查配置进程的启动状态，只在首次打开时切换输入法
+; 定期检查配置进程的启动状态，只在打开时切换输入法
 SetTimer(CheckProcs, 2000)
 
 ; 切换到英文键盘布局
@@ -42,7 +51,6 @@ Switch_EnKL(hWnd) {
 CheckProcs() {
     ; Tip("check")
     for proc in enProcs {
-
         ; 进程是否打开, 若关闭则重置标记
         if (!ProcessExist(proc)) {
             ; Tip("noExist " . proc)
@@ -52,7 +60,7 @@ CheckProcs() {
         }
         try {
             ; Tip("Exist " . proc)
-            
+
             ; 检查指定进程是否有活动窗口并获取句柄, 以及是否已切换过一次
             if (hWnd := WinActive("ahk_exe " . proc)) && !setToEn[proc] {
                 ; Tip("Hwnd " . hWnd)
@@ -69,7 +77,6 @@ CheckProcs() {
             continue
         }
     }
-
 }
 FormatHKL(hKL) => Format("0x{:08X}", hKL)
 /**
