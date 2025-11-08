@@ -30,19 +30,21 @@ SetTimer(CheckProcs, 2000)
 
 ; 切换到英文键盘布局
 Switch_EnKL(hWnd) {
-    static enHKL := 0x04090409
-    static cnHKL := 0x08040804
+    static enKLID := 0x04090409
+    static cnKLID := 0x08040804
+    static GetWinThreadId(hwnd) => DllCall("GetWindowThreadProcessId", "ptr", hwnd, "ptr", 0, "int")
+    static GetWinActiveKLID(threadId) => DllCall("GetKeyboardLayout", "Uint", threadId, "ptr")
+    ; 向窗口发送 WM_INPUTLANGCHANGEREQUEST 消息切换输入法
+    static SetWinKLID(hKL, hWnd) => PostMessage(0x50, 0, hKL, hWnd)
 
-    ; 获取与该窗口关联的线程ID
-    threadId := GetWindowThreadProcessId(hWnd, 0)
-    ; Tip("threadId " . threadId)
 
     ; 获取该线程的键盘布局ID
-    hKL := GetKeyboardLayout(threadId)
+    KLID := GetWinActiveKLID(GetWinThreadId(hWnd))
+    ; Tip("threadId " . threadId)
     ; Tip("HKL " . FormatHKL(hKL))
 
-    if hKL == cnHKL {
-        Post_WM_INPUTLANGCHANGEREQUEST(enHKL, hWnd)
+    if KLID == cnKLID {
+        SetWinKLID(enKLID, hWnd)
         ; Tip("已切换到英文输入法")
     }
 }
@@ -78,21 +80,21 @@ CheckProcs() {
         }
     }
 }
-FormatHKL(hKL) => Format("0x{:08X}", hKL)
+; FormatKLID(KLID) => Format("0x{:08X}", KLID)
 /**
  * 自动关闭的提示窗口 
  * @param message 要提示的文本
  * @param {number} time 超时后关闭
  */
-Tip(message, time := -1500) {
-    ToolTip(message)
-    SetTimer(() => ToolTip(), time)
-    ; Sleep(1000)
-}
+; Tip(message, time := -1500) {
+;     ToolTip(message)
+;     SetTimer(() => ToolTip(), time)
+; Sleep(1000)
+; }
 
-; 向窗口发送 WM_INPUTLANGCHANGEREQUEST 消息切换输入法
-Post_WM_INPUTLANGCHANGEREQUEST(hKL, hWnd) {
-    PostMessage(0x50, 0, hKL, hWnd)
-}
-GetWindowThreadProcessId(hWnd, lpdwProcessId) => DllCall('User32\GetWindowThreadProcessId', 'ptr', hWnd, 'ptr', lpdwProcessId, 'uint')
-GetKeyboardLayout(idThread) => DllCall('User32\GetKeyboardLayout', 'uint', idThread, 'ptr')
+
+; SetKeyboardLayout(hKL, hWnd) {
+;     PostMessage(0x50, 0, hKL, hWnd)
+; }
+; GetWindowThreadProcessId(hWnd, lpdwProcessId) => DllCall('User32\GetWindowThreadProcessId', 'ptr', hWnd, 'ptr', lpdwProcessId, 'uint')
+; GetKeyboardLayout(idThread) => DllCall('User32\GetKeyboardLayout', 'uint', idThread, 'ptr')
