@@ -33,7 +33,7 @@ CapsLock & s:: addProc()
 CapsLock & d:: removeProc()
 
 #HotIf enProcs.Length == 0
-CapsLock & q:: addProc_inputBox()
+CapsLock & s:: addProc_inputBox()
 #HotIf
 
 global setToEn := Map()
@@ -136,7 +136,7 @@ addProc(*) {
 
 
 inputProc(*) {
-    result := InputBox("请使用Capslock+Q获取活动窗口进程名", "添加进程", "w260 h100")
+    result := InputBox("请使用Capslock+S获取活动窗口进程名", "添加进程", "w260 h100")
     if result.Result == "OK" {
         proc := result.Value
         _addProc(proc)
