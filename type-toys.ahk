@@ -1,3 +1,12 @@
+/************************************************************************
+ * @description: 定期检查指定进程的启动状态，只在程序启动时切换输入法.
+ * 配合系统设置使用:允许我为每个应用窗口使用不同的输入法
+ * @author azurezee
+ * @date 2025/11/14
+ * @version 0.1.1
+ ***********************************************************************/
+
+
 #Requires AutoHotkey v2.0
 #Include lib\JSON.ahk ; https://github.com/thqby/ahk2_lib/blob/master/JSON.ahk
 #Include lib\Utils.ahk
