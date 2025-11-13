@@ -1,3 +1,10 @@
 {
-  "en": ["WindowsTerminal.exe", "Code.exe","explorer.exe","Taskmgr.exe","Microsoft.CmdPal.UI.exe"]
+  "en":[
+    "Microsoft.CmdPal.UI.exe",
+    "Taskmgr.exe",
+    "WindowsTerminal.exe",
+    "explorer.exe",
+    "mintty.exe",
+    "Code.exe"
+  ]
 }

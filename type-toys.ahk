@@ -29,7 +29,8 @@ SetCapsLockState "AlwaysOff"
 CapsLock:: {
     SendInput("#{Space}")
 }
-CapsLock & q:: addProc()
+CapsLock & s:: addProc()
+CapsLock & d:: removeProc()
 
 #HotIf enProcs.Length == 0
 CapsLock & q:: addProc_inputBox()
@@ -66,7 +67,6 @@ Switch_EnKL(hWnd) {
     ; 向窗口发送 WM_INPUTLANGCHANGEREQUEST 消息切换输入法
     static SetWinKLID(hKL, hWnd) => PostMessage(0x50, 0, hKL, hWnd)
 
-
     ; 获取该线程的键盘布局ID
     KLID := GetWinActiveKLID(GetWinThreadId(hWnd))
 
@@ -95,34 +95,51 @@ CheckProcs() {
         }
     }
 }
-
-addProc(*) {
+removeProc(*) {
     proc := WinGetProcessName(WinExist("A"))
-
-    if !setToEn.Has(proc)
+    _removeProc(proc)
+}
+_removeProc(proc) {
+    if setToEn.Has(proc)
+    {
+        setToEn.Delete(proc)
+        enProcs.Length := 0
+        for val in setToEn {
+            enProcs.Push(val)
+        }
+        config["en"] := enProcs
+        jsonObj := JSON.stringify(config, ,)
+        FileOpen(A_ScriptDir . "\config.json", "w",).Write(jsonObj)
+        Tip("Remove " . proc,)
+    } else {
+        Tip("NotExist " . proc,)
+    }
+}
+_addProc(proc) {
+    if proc != "" && !setToEn.Has(proc)
     {
         setToEn[proc] := false
         enProcs.Push(proc)
         config["en"] := enProcs
         jsonObj := JSON.stringify(config, ,)
         FileOpen(A_ScriptDir . "\config.json", "rw",).Write(jsonObj)
-        ; MsgBox "You entered '" Join("`n", enProcs*) "'."
+        Tip("Add " . proc,)
+    } else {
+        Tip("Exist " . proc,)
     }
 }
+
+addProc(*) {
+    proc := WinGetProcessName(WinExist("A"))
+    _addProc(proc)
+}
+
 
 inputProc(*) {
     result := InputBox("请使用Capslock+Q获取活动窗口进程名", "添加进程", "w260 h100")
     if result.Result == "OK" {
         proc := result.Value
-        if proc != "" && !setToEn.Has(proc)
-        {
-            setToEn[proc] := false
-            enProcs.Push(proc)
-            config["en"] := enProcs
-            jsonObj := JSON.stringify(config, ,)
-            FileOpen(A_ScriptDir . "\config.json", "rw",).Write(jsonObj)
-            ; MsgBox "You entered '" Join("`n", enProcs*) "'."
-        }
+        _addProc(proc)
     }
 }
 addProc_inputBox(*) {
@@ -131,3 +148,8 @@ addProc_inputBox(*) {
     WinActivate("添加进程")
 }
 ; FormatKLID(KLID) => Format("0x{:08X}", KLID)
+Join(sep, params*) {
+    for index, param in params
+        str .= param . sep
+    return SubStr(str, 1, -StrLen(sep))
+}
