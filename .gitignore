@@ -1,1 +1,5 @@
 GetKeyboardLayout.ahk
+config-2.json
+keymap.ahk
+auto_switch_IME.ahk
+test.ahk
