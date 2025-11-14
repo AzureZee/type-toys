@@ -8,11 +8,13 @@
 
 
 #Requires AutoHotkey v2.0
+#SingleInstance Force
 #Include lib\JSON.ahk ; https://github.com/thqby/ahk2_lib/blob/master/JSON.ahk
 #Include lib\Utils.ahk
 #Include lib\RunAsAdmin.ahk
 RunAsAdmin()
-
+SendMode('Event')
+SetKeyDelay(-1, 0)
 ; 鼠标侧键上
 XButton2::
 {
@@ -27,7 +29,7 @@ XButton1::
 ; CapsLock 映射为 Win+Space，切换输入布局（中英文）
 SetCapsLockState "AlwaysOff"
 CapsLock:: {
-    SendInput("#{Space}")
+    Send("#{Space}")
 }
 CapsLock & s:: addProc()
 CapsLock & d:: removeProc()
@@ -42,17 +44,30 @@ global enProcs := []
 try {
     config := JSON.Parse(FileRead(A_ScriptDir . "\config.json"))
     enProcs := config["en"]
-    if enProcs.Length == 0 {
-        inputProc()
-    } else {
-        for procName in enProcs {
-            ; 初始化所有配置进程为“未设置”状态
-            setToEn[procName] := false
+} catch OSError {
+    config := Map()
+    enProcs := ["Code.exe", "WindowsTerminal.exe"]
+    config["en"] := enProcs
+    try {
+        FileOpen(A_ScriptDir . "\config.json", "w",).Write(JSON.stringify(config, ,))
+    } catch OSError as Err {
+        result := MsgBox("Can't open the config.json"
+            . "`n`nError " . Err.Extra ": " . Err.Message
+            . "Would you like to reload?", , "YesNo Icon!")
+        if result == "Yes" {
+            Reload
+        } else {
+            ExitApp
         }
     }
-} catch {
-    MsgBox("无法加载 config.json, 请检查文件是否存在且格式正确。", "错误", "OK Icon!")
-    ExitApp
+}
+if enProcs.Length == 0 {
+    inputProc()
+} else {
+    for procName in enProcs {
+        ; 初始化所有配置进程为“未设置”状态
+        setToEn[procName] := false
+    }
 }
 
 ; 定期检查配置进程的启动状态，只在打开时切换输入法
@@ -108,8 +123,7 @@ _removeProc(proc) {
             enProcs.Push(val)
         }
         config["en"] := enProcs
-        jsonObj := JSON.stringify(config, ,)
-        FileOpen(A_ScriptDir . "\config.json", "w",).Write(jsonObj)
+        FileOpen(A_ScriptDir . "\config.json", "w",).Write(JSON.stringify(config, ,))
         Tip("Remove " . proc,)
     } else {
         Tip("NotExist " . proc,)
@@ -121,8 +135,7 @@ _addProc(proc) {
         setToEn[proc] := false
         enProcs.Push(proc)
         config["en"] := enProcs
-        jsonObj := JSON.stringify(config, ,)
-        FileOpen(A_ScriptDir . "\config.json", "rw",).Write(jsonObj)
+        FileOpen(A_ScriptDir . "\config.json", "rw",).Write(JSON.stringify(config, ,))
         Tip("Add " . proc,)
     } else {
         Tip("Exist " . proc,)
